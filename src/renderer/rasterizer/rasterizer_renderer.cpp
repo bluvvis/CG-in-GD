@@ -43,9 +43,16 @@ void cg::renderer::rasterization_renderer::render()
 		return std::make_pair(transformed_vertex, vertex_data);
 	};
 
-	// Set up pixel shader
+	// Set up pixel shader - Normal visualization (creative modification)
 	rasterizer->pixel_shader = [](const cg::vertex& vertex_data, const float z) {
-		return vertex_data.diffuse;
+		// Convert normal from [-1,1] to [0,1] range for color display
+		float3 normal_color = (vertex_data.normal + float3{1.0f, 1.0f, 1.0f}) * 0.5f;
+
+		// Mix normal color with material color for better visual effect
+		float3 material_color = vertex_data.diffuse.to_float3();
+		float3 final_color = lerp(material_color, normal_color, 0.7f);
+
+		return cg::color{final_color.x, final_color.y, final_color.z};
 	};
 
 	// Draw the model
